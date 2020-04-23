@@ -1,0 +1,5 @@
+name: NewsSystem
+version: 1.0.0
+author: lukeeff
+description: Developer trial for Melon Games.
+main: io.github.lukeeff.newssystem.NewsSystem

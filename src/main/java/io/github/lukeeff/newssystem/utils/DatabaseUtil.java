@@ -1,6 +1,6 @@
-package io.github.lukeeff.newssytem.utils;
+package io.github.lukeeff.newssystem.utils;
 
-import io.github.lukeeff.newssytem.NewsSystem;
+import io.github.lukeeff.newssystem.NewsSystem;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -32,17 +32,6 @@ public class DatabaseUtil {
     public DatabaseUtil(NewsSystem instance) {
         plugin = instance;
         connection = plugin.sqlManager.getConnection();
-    }
-
-    /**
-     * Creates a new table in the database
-     * <p>For the purposes of this task, we
-     * only will need one table</p>
-     * @throws SQLException thrown when syntax is invalid
-     */
-    private void createTable() throws SQLException {
-        Statement statement = connection.createStatement(); //Can't use PreparedStatement here.
-        statement.executeUpdate(CREATETABLE);
     }
 
 

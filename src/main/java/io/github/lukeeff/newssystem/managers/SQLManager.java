@@ -1,11 +1,12 @@
-package io.github.lukeeff.newssytem.managers;
+package io.github.lukeeff.newssystem.managers;
 
-import io.github.lukeeff.newssytem.NewsSystem;
+import io.github.lukeeff.newssystem.NewsSystem;
 
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class SQLManager {
 
@@ -17,6 +18,8 @@ public class SQLManager {
 
     public SQLManager(NewsSystem instance) {
         this.plugin = instance;
+        createDatabaseDirectory();
+        establishDatabaseConnection();
     }
 
     /**
@@ -41,24 +44,22 @@ public class SQLManager {
     }
 
     /**
-     * Gets the plugins root data folder
-     * @return NewsSystem's root folder
-     */
-    private File getDatabaseFolder() {
-        return plugin.getDataFolder();
-    }
-
-    /**
      * Establishes a connection to the local SQLite database.
      * <p>The method will only need to be called once and
-     * will create a new database file if one does not exist.</p>
+     * will create a new database file if one does not exist.
+     * SQLException will be thrown when driver is not found
+     * or syntax is invalid. ClassNotFound thrown when driver
+     * class is not found. SQLite is a dependency in gradle.</p>
      */
     private void establishDatabaseConnection() {
         try {
             final String databaseFilePath = getDatabaseFilePath();
             final String driver = "jdbc:sqlite:";
+            plugin.getLogger().info(driver + databaseFilePath);
+            Class.forName("org.sqlite.JDBC"); //Required for initial connection.
             this.connection = DriverManager.getConnection(driver + databaseFilePath);
-        } catch (SQLException syntaxException) {
+            createTable();
+        } catch (SQLException | ClassNotFoundException syntaxException) {
             syntaxException.printStackTrace();
         }
     }
@@ -69,6 +70,28 @@ public class SQLManager {
      */
     public Connection getConnection() {
         return this.connection;
+    }
+
+    /**
+     * Creates a new table in the database
+     * <p>For the purposes of this task, we
+     * only will need one table. In real life
+     * application, a library would be used to avoid
+     * code duplication or I'd build one myself</p>
+     * @throws SQLException thrown when syntax is invalid
+     */
+    private void createTable() throws SQLException {
+        final String TABLENAME = "player_data";
+        final String PRIMARYCOl = "UUID varChar PRIMARY KEY, \n";
+        final String SECONDCOL = "RECEIVENEWS int NOT NULL";
+        final String ENDCOL = "\n);";
+
+        String CREATETABLE = "CREATE TABLE IF NOT EXISTS " +
+                TABLENAME + "(\n" + PRIMARYCOl + SECONDCOL + ENDCOL;
+
+
+        Statement statement = connection.createStatement(); //Can't use PreparedStatement here.
+        statement.executeUpdate(CREATETABLE);
     }
 
 }
