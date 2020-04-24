@@ -3,3 +3,9 @@ version: 1.0.0
 author: lukeeff
 description: Developer trial for Melon Games.
 main: io.github.lukeeff.newssystem.NewsSystem
+commands:
+  togglenews:
+    description: Enables/Disables the news feed.
+    usage: /togglenews
+    permission: newssystem.togglenews
+    permission-message: You do not have permission to toggle news!

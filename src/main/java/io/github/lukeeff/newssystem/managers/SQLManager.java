@@ -1,12 +1,21 @@
 package io.github.lukeeff.newssystem.managers;
 
 import io.github.lukeeff.newssystem.NewsSystem;
+import io.github.lukeeff.newssystem.utils.DatabaseUtil;
 
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+    /**
+     * This is the SQLManager class I've built.
+     * I'm not stoked with how it turned out, but
+     * manipulating SQL syntax in an organized fashion
+     * is challenging and I did not implement a library
+     * to do the hard work for me.
+     */
 
 public class SQLManager {
 
@@ -81,17 +90,18 @@ public class SQLManager {
      * @throws SQLException thrown when syntax is invalid
      */
     private void createTable() throws SQLException {
-        final String TABLENAME = "player_data";
-        final String PRIMARYCOl = "UUID varChar PRIMARY KEY, \n";
-        final String SECONDCOL = "RECEIVENEWS int NOT NULL";
+        final String TABLENAME = DatabaseUtil.getTablename();
+        final String PRIMARYCOl = DatabaseUtil.getColprimary() + " varChar PRIMARY KEY, \n";
+        final String SECONDCOL = DatabaseUtil.getColsecondary() + " varChar NOT NULL";
         final String ENDCOL = "\n);";
 
         String CREATETABLE = "CREATE TABLE IF NOT EXISTS " +
                 TABLENAME + "(\n" + PRIMARYCOl + SECONDCOL + ENDCOL;
 
-
         Statement statement = connection.createStatement(); //Can't use PreparedStatement here.
         statement.executeUpdate(CREATETABLE);
     }
+
+
 
 }
