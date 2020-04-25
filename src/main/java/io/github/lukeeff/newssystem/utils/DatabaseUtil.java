@@ -1,6 +1,9 @@
 package io.github.lukeeff.newssystem.utils;
 
 import io.github.lukeeff.newssystem.NewsSystem;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 
 import java.sql.Connection;
@@ -12,31 +15,22 @@ import java.util.UUID;
 
 public class DatabaseUtil {
 
-    //Name for SQL table
-    //private static final String TABLENAME = "news";
-    private static final String TABLENAME = "player_data";
-
+    //Table name
+    @Getter private static final String TABLENAME = "player_data";
     //Column names
-    private static final String COLPRIMARY = "UUID";
-    private static final String COLSECONDARY = "RECEIVENEWS";
-
-    //Syntax
-    private static final String VARCHAR = "varChar";
-
-    //Statements
-
-
-
-    private NewsSystem plugin; //TODO convert to local variable if not needed global later on
-    private static Connection connection; //To avoid calling
+    @Getter private static final String COLPRIMARY = "UUID";
+    @Getter private static final String COLSECONDARY = "RECEIVENEWS";
+    //Instances
+    @Getter private NewsSystem plugin; //TODO convert to local variable if not needed global later on
+    @Getter private static Connection connection; //To avoid calling
 
     /**
      * Constructor for DatabaseUtil
      * @param instance instance of NewsSystem
      */
-    public DatabaseUtil(NewsSystem instance) {
+    public DatabaseUtil(@NonNull NewsSystem instance) {
         plugin = instance;
-        connection = plugin.sqlManager.getConnection();
+        connection = plugin.getSqlManager().getConnection();
     }
 
     /**
@@ -48,7 +42,7 @@ public class DatabaseUtil {
      * news feed</p>
      * @param UUID
      */
-    public static void addPlayerToDatabase(final String UUID) {
+    public static void addPlayerToDatabase(@NonNull final String UUID) {
         final String INSERTDATA = "INSERT INTO " + TABLENAME + " ("
                 + COLPRIMARY + "," + COLSECONDARY + ")\nVALUES "
                 + "(?,?);";
@@ -72,7 +66,7 @@ public class DatabaseUtil {
      * @throws SQLException thrown with sql syntax error
      */
     private static void setPlayerData(String uuid, String column, String newValue) throws SQLException {
-        final String UPDATE = "UPDATE " + getTablename() + "\nSET "  + column + " = ?\nWHERE " + COLPRIMARY + " = ?;";
+        final String UPDATE = "UPDATE " + getTABLENAME() + "\nSET "  + column + " = ?\nWHERE " + COLPRIMARY + " = ?;";
         PreparedStatement statement = connection.prepareStatement(UPDATE);
         statement.setString(1, newValue);
         statement.setString(2, uuid);
@@ -89,7 +83,7 @@ public class DatabaseUtil {
      * @throws SQLException thrown in respect to improper syntax
      */
     private static String getPlayerData(String whereColumnKey, String fromColumn, String whereColumn) throws SQLException {
-        final String SELECTSYNTAX = "SELECT " + fromColumn + " FROM " + getTablename() + " WHERE " + whereColumn + " = ?";
+        final String SELECTSYNTAX = "SELECT " + fromColumn + " FROM " + getTABLENAME() + " WHERE " + whereColumn + " = ?";
 
         PreparedStatement statement = getConnection().prepareStatement(SELECTSYNTAX);
         statement.setString(1, whereColumnKey);
@@ -131,14 +125,6 @@ public class DatabaseUtil {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Gets the name of the database table
-     * @return the name of the database table
-     */
-    public static String getTablename() {
-        return TABLENAME;
     }
 
     /**

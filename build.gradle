@@ -1,6 +1,10 @@
-apply plugin: 'java'
+plugins {
+    id 'java'
+}
 
 version = '1.0'
+
+
 
 repositories {
     mavenCentral()
@@ -8,8 +12,16 @@ repositories {
         url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots"
     }
     mavenLocal()
+
 }
+
+
 dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+    testCompileOnly 'org.projectlombok:lombok:1.18.12'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
+
     compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.7.2'
     compileOnly group: 'org.spigotmc', name: 'spigot', version: '1.8.8-R0.1-SNAPSHOT'
 }

@@ -25,13 +25,11 @@ public class PlayerJoin implements Listener {
         final Player player = event.getPlayer();
         final UUID PLAYERID = player.getUniqueId();
 
-        if(DatabaseUtil.playerExists(PLAYERID.toString())) {
-            plugin.broadcastUtil.registerPlayer(PLAYERID);
-        } else {
+        if(!DatabaseUtil.playerExists(PLAYERID.toString())) {
             DatabaseUtil.addPlayerToDatabase(PLAYERID.toString());
             Bukkit.broadcastMessage(ChatColor.GREEN + player.getName() + ChatColor.AQUA + " is joining for the first time!");
-
         }
+        plugin.broadcastUtil.registerPlayer(PLAYERID);
     }
 
 }

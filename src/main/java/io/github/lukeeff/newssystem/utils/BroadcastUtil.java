@@ -5,8 +5,10 @@ import net.minecraft.server.v1_8_R3.IChatBaseComponent;
 import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 
@@ -14,24 +16,26 @@ public class BroadcastUtil {
 
     private static final long delay = 80; //Ticks throw in config with message
     private NewsSystem plugin;
+    private ConfigUtil configUtil;
+    private FileConfiguration config;
     private final Set<UUID> newsRecipent =  new HashSet<>();
-    private ArrayList<String> messageList = new ArrayList<>();
+    private Map<String, String> newsMap;
     private static boolean scheduleNewsSwitch;
+    private BukkitTask newsTask;
 
     public BroadcastUtil(NewsSystem instance) {
         plugin = instance;
-        addNews("");
+        configUtil = plugin.getConfigUtil();
+        setNewsMap();
+        Bukkit.getConsoleSender().sendMessage(configUtil.getMessageMap().toString());
     }
 
-    public void addNews(String news) {
-        this.messageList.add(ChatColor.AQUA + "Test message 1");
-        messageList.add("Another message (2)");
-        messageList.add("I am a message (3) ");
-        messageList.add(ChatColor.DARK_RED + "Get ready... (4)");
-        messageList.add(ChatColor.AQUA + "3... (5)");
-        messageList.add(ChatColor.GOLD + "2... (6)");
-        messageList.add(ChatColor.LIGHT_PURPLE + "1... (7)");
-        messageList.add(ChatColor.BLUE + "Well, that was anticlimactic :I");
+    public void setNewsMap() {
+        newsMap = configUtil.getMessageMap();
+    }
+
+    private Map<String, String> getNewsMap() {
+        return this.newsMap;
     }
 
     /**
@@ -49,10 +53,6 @@ public class BroadcastUtil {
      */
     public boolean getScheduleNewsSwitch() {
         return scheduleNewsSwitch;
-    }
-
-    private ArrayList<String> getMessageList() {
-        return messageList;
     }
 
     /**
@@ -76,9 +76,7 @@ public class BroadcastUtil {
      * @param message the message to be broadcast to players in the recipient list
      */
     public void sendActionBar(final String message) {
-        //Bukkit.broadcastMessage(ChatColor.GREEN + "List of peeps: " + newsRecipent.toString());
         for(final UUID playerID : newsRecipent) {
-            //Bukkit.broadcastMessage(ChatColor.GREEN + "Packets sending"); // Debug
             final CraftPlayer player = (CraftPlayer) Bukkit.getPlayer(playerID);
             final PacketPlayOutChat chat = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + message + "\"}"), (byte) 2);
             player.getHandle().playerConnection.sendPacket(chat);
@@ -95,9 +93,25 @@ public class BroadcastUtil {
      */
     public void beginBroadcast() {
         BukkitScheduler scheduler = plugin.getServer().getScheduler();
-        ListIterator<String> msg = messageList.listIterator();
-        scheduler.runTaskTimer(plugin,
-                () -> { if (!msg.hasNext()) { recycleList(msg); }sendActionBar(msg.next()); }, delay, delay);
+        List<String> newsMessages = new ArrayList<>();
+        newsMessages.addAll(getNewsMap().values());
+
+        newsTask = startNewsTask(scheduler, newsMessages.listIterator());
+    }
+
+    /**
+     * Called to restart the news task, typically when
+     * news is added/removed from the map.
+     */
+    public void restartNewsTask() {
+        newsTask.cancel();
+        setNewsMap();
+        beginBroadcast();
+    }
+
+    private BukkitTask startNewsTask(BukkitScheduler scheduler, ListIterator<String> msgs) {
+        return scheduler.runTaskTimer(plugin,
+                () -> { if (!msgs.hasNext()) { recycleList(msgs); } sendActionBar(msgs.next()); }, delay, delay);
     }
 
     /**

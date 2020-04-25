@@ -15,6 +15,7 @@ public class ConfigManager {
 
     private NewsSystem plugin;
     private FileConfiguration config;
+    private File configFile;
 
     /**
      * Constructor for ConfigManager.
@@ -36,7 +37,6 @@ public class ConfigManager {
     public FileConfiguration getConfig() {
         return config;
     }
-
 
     /**
      * Creates root plugin folder directory
@@ -62,6 +62,14 @@ public class ConfigManager {
         try {
             config.load(configFile);
         } catch (InvalidConfigurationException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void saveConfig() {
+        try {
+            config.save(getConfigFile());
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

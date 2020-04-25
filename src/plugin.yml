@@ -9,3 +9,8 @@ commands:
     usage: /togglenews
     permission: newssystem.togglenews
     permission-message: You do not have permission to toggle news!
+  news:
+    description: Administrative news interface.
+    usage: /news <add,remove> <key> <message>
+    permission: newssystem.admin
+    permission-message: You do not have administrative news permission!

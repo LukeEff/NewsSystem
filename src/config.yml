@@ -1,2 +1,9 @@
-someSting: 'message'
 enable-news: 'true'
+toggle-news: 'News has been toggled to: '
+invalid-input: '&4Error: Invalid arguments for specified command!'
+delay: 80
+action-messages:
+  - news:
+      welcome: '&bWelcome to the server!'
+      vote: '&4It seems you have forgotten to vote!'
+      beep: '&6beep &4boop &bbop &abip &4&lBANG!!!'
