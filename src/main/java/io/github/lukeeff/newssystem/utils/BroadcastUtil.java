@@ -1,58 +1,56 @@
 package io.github.lukeeff.newssystem.utils;
 
 import io.github.lukeeff.newssystem.NewsSystem;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent;
 import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 
+/**
+ * Handles the action bar logic. Runs a BukkitTask to send action bars with custom
+ * messages found in the configuration file at a configurable interval
+ *
+ * Struggled to build something clean here as I was going for something
+ * easy to read, maintainable and as efficient as I could get it.
+ *
+ * @author lukeeff
+ * @since 4/25/2020
+ */
 public class BroadcastUtil {
 
-    private static final long delay = 80; //Ticks throw in config with message
-    private NewsSystem plugin;
-    private ConfigUtil configUtil;
-    private FileConfiguration config;
-    private final Set<UUID> newsRecipent =  new HashSet<>();
-    private Map<String, String> newsMap;
-    private static boolean scheduleNewsSwitch;
-    private BukkitTask newsTask;
+    @Getter @Setter private long delay;
+    @Getter private final NewsSystem plugin;
+    @Getter private final ConfigUtil configUtil;
+    @Getter private final DatabaseUtil databaseUtil;
+    @Getter private final Set<UUID> newsRecipent =  new HashSet<>();
+    @Getter @Setter private Map<String, String> newsMap;
+    @Getter @Setter private BukkitTask newsTask;
+    @Getter private final BukkitScheduler scheduler;
+    @Getter private final List<String> NEWSMESSAGES = new ArrayList<>();
 
-    public BroadcastUtil(NewsSystem instance) {
-        plugin = instance;
-        configUtil = plugin.getConfigUtil();
-        setNewsMap();
-        Bukkit.getConsoleSender().sendMessage(configUtil.getMessageMap().toString());
-    }
+    public BroadcastUtil(@NonNull NewsSystem instance) {
+        this.plugin = instance;
+        this.configUtil = getPlugin().getConfigUtil();
+        this.databaseUtil = getPlugin().getDatabaseUtil();
+        this.scheduler = getPlugin().getServer().getScheduler();
 
-    public void setNewsMap() {
-        newsMap = configUtil.getMessageMap();
-    }
-
-    private Map<String, String> getNewsMap() {
-        return this.newsMap;
+        setNewsMap(getConfigUtil().getMessageMap());
     }
 
     /**
-     * Sets the boolean that determines if the
-     * news will broadcast
-     * @param value true to enable broadcasting
+     * Updates the messages that will be broadcasted to the
+     * players from the config
      */
-    public void setScheduleNewsSwitch(boolean value) {
-        scheduleNewsSwitch = value;
-    }
-
-    /**
-     * Gets the value of the scheduleNewsSwitch
-     * @return true when it is true
-     */
-    public boolean getScheduleNewsSwitch() {
-        return scheduleNewsSwitch;
+    private void updateNEWSMESSAGES() {
+        getNEWSMESSAGES().clear();
+        getNEWSMESSAGES().addAll(getNewsMap().values());
     }
 
     /**
@@ -61,11 +59,11 @@ public class BroadcastUtil {
      * in the database.
      * @param PLAYERID the UUID of the target player
      */
-    public void registerPlayer(final UUID PLAYERID) {
-        if(DatabaseUtil.canSeeNews(PLAYERID.toString())) {
-            newsRecipent.add(PLAYERID);
+    public void registerPlayer(@NonNull final UUID PLAYERID) {
+        if(getDatabaseUtil().canSeeNews(PLAYERID)) {
+            getNewsRecipent().add(PLAYERID);
         } else {
-            newsRecipent.remove(PLAYERID);
+            getNewsRecipent().remove(PLAYERID);
         }
     }
 
@@ -73,30 +71,29 @@ public class BroadcastUtil {
      * Send players a packet containing a message in their respective
      * action bar
      * TODO: Explain what the obfuscated method does
-     * @param message the message to be broadcast to players in the recipient list
+     * @param MESSAGE the message to be broadcast to players in the recipient list
      */
-    public void sendActionBar(final String message) {
+    private void sendActionBar(@NonNull final String MESSAGE) {
         for(final UUID playerID : newsRecipent) {
-            final CraftPlayer player = (CraftPlayer) Bukkit.getPlayer(playerID);
-            final PacketPlayOutChat chat = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + message + "\"}"), (byte) 2);
-            player.getHandle().playerConnection.sendPacket(chat);
+            @NonNull final CraftPlayer PLAYER = (CraftPlayer) Bukkit.getPlayer(playerID);
+            final String ACTIONMSG = "{\"text\":\"" + MESSAGE + "\"}";
+            final PacketPlayOutChat PACKET = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a(ACTIONMSG), (byte) 2);
+            PLAYER.getHandle().playerConnection.sendPacket(PACKET);
         }
     }
 
     /**
-     * Struggling here to build something clean. Not happy with how this method turned out. I'm sure it could
-     * have been accomplished with MUCH more simple code. TODO: Explain thought process
-     *
+     * Struggling here to build something clean. Not super happy
+     * with how this feature turned out. I'm sure it could
+     * have been accomplished with MUCH more simple code.
      * Broadcasts news Strings from the messageList
-     * to players in the newsRecipent list at a fixed
+     * to players in the newsRecipient list at a fixed
      * interval
      */
     public void beginBroadcast() {
-        BukkitScheduler scheduler = plugin.getServer().getScheduler();
-        List<String> newsMessages = new ArrayList<>();
-        newsMessages.addAll(getNewsMap().values());
-
-        newsTask = startNewsTask(scheduler, newsMessages.listIterator());
+        updateNEWSMESSAGES();
+        setDelay(getConfigUtil().getDelay());
+        setNewsTask(initiateNewsTask(getNEWSMESSAGES().listIterator()));
     }
 
     /**
@@ -104,14 +101,19 @@ public class BroadcastUtil {
      * news is added/removed from the map.
      */
     public void restartNewsTask() {
-        newsTask.cancel();
-        setNewsMap();
+        getNewsTask().cancel();
+        setNewsMap(getConfigUtil().getMessageMap());
         beginBroadcast();
     }
 
-    private BukkitTask startNewsTask(BukkitScheduler scheduler, ListIterator<String> msgs) {
-        return scheduler.runTaskTimer(plugin,
-                () -> { if (!msgs.hasNext()) { recycleList(msgs); } sendActionBar(msgs.next()); }, delay, delay);
+    /**
+     * Initiates the action bar task at a specified interval
+     * @param msgs the messages that will be broadcasted
+     * @return the task. Returned for cancelling functionality
+     */
+    private BukkitTask initiateNewsTask(ListIterator<String> msgs) {
+        return getScheduler().runTaskTimer(getPlugin(), () -> {
+            if (!msgs.hasNext()) { recycleList(msgs); } sendActionBar(msgs.next()); }, getDelay(), getDelay());
     }
 
     /**

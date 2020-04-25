@@ -1,37 +1,43 @@
 package io.github.lukeeff.newssystem.commands;
 
-import io.github.lukeeff.newssystem.NewsSystem;
-import io.github.lukeeff.newssystem.utils.DatabaseUtil;
+import lombok.NonNull;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.entity.Player;
 
+import javax.annotation.Nullable;
+import java.util.UUID;
+
+/**
+ * This class will be utilized when a player
+ * wishes to enable or disable a news feed
+ * message. The handleCommand method will be
+ * called and toggle the preference from the
+ * database and update the news recipient list
+ * accordingly
+ *
+ * @author lukeeff
+ * @since 4/25/2020
+ */
 public class ToggleNews extends AbstractCommand implements CommandExecutor {
 
-    private NewsSystem plugin;
-    private final String TOGGLEDNEWS;
-
     /**
-     * Constructor for ToggleNews. Initializes field
-     * variables
-     * @param instance instance of the main class
-     */
-    public ToggleNews(NewsSystem instance) {
-        plugin = instance;
-        TOGGLEDNEWS = plugin.configUtil.getToggleMessage();
-    }
-
-    /**
-     * Called when player enters the command "ToggleNews"
+     * Called when player enters the command "ToggleNews".
+     * ToggledNews is defined in here in case the message is
+     * ever changed so it can update without a reload being
+     * necessary.
      * <p>ToggleNews will enable or disable the news action
      * bar message for a target player that executed
-     * the command, depending on the current value</p>
+     * the command, depending on the current value. The
+     * player will then be sent a message that states
+     * the current state of the toggle (on or off)</p>
      * @param player The player that executed the command
-     * @param playerID the UUID of the player as String
      * @param args the arguments a player entered
      */
     @Override
-    void handleCommand(Player player, String playerID, String[] args) {
-        player.sendMessage(TOGGLEDNEWS + DatabaseUtil.toggleNews(playerID));
-        plugin.broadcastUtil.registerPlayer(player.getUniqueId());
+    void handleCommand(@NonNull final Player player, @Nullable String[] args) {
+        final String TOGGLEDNEWS = getPlugin().getConfigUtil().getToggleMessage();
+        final UUID PLAYERID = player.getUniqueId();
+        player.sendMessage(TOGGLEDNEWS + getDatabaseUtil().toggleNews(PLAYERID));
+        getBroadcastUtilInstance().registerPlayer(PLAYERID);
     }
 }

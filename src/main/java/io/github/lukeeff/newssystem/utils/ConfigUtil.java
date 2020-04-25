@@ -1,7 +1,8 @@
 package io.github.lukeeff.newssystem.utils;
 
 import io.github.lukeeff.newssystem.NewsSystem;
-import org.bukkit.Bukkit;
+import lombok.Getter;
+import lombok.NonNull;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -10,21 +11,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Configuration Utility class. Takes care of retrieval,
+ * storage, and modification of data stored in the
+ * configuration file.
+ *
+ * PS: I kept my mind open to future features when building this,
+ * leading to some slightly more complicated logic in respect to
+ * retrieval of news messages.
+ *
+ * @author lukeeff
+ * @since 4/25/2020
+ */
 public class ConfigUtil {
 
-    //Config files
-    NewsSystem plugin;
-    FileConfiguration config;
+    @Getter private final NewsSystem PLUGIN;
+    @Getter private final FileConfiguration CONFIG;
 
-    //Paths
-    private final String DELAYPATH = "delay";
-    private final String TOGGLEPATH = "toggle-news";
-    private final String MESSAGELISTPATH = "action-messages";
-    private final String INVALIDARGSPATH = "invalid-input";
+    //Paths.
+    @Getter private final String DELAYPATH = "delay";
+    @Getter private final String TOGGLEPATH = "toggle-news";
+    @Getter private final String MESSAGELISTPATH = "action-messages";
+    @Getter private final String INVALIDARGSPATH = "invalid-input";
 
-    public ConfigUtil(NewsSystem instance, FileConfiguration config) {
-        plugin = instance;
-        this.config = config;
+    public ConfigUtil(@NonNull NewsSystem instance, @NonNull FileConfiguration config) {
+        this.PLUGIN = instance;
+        this.CONFIG = config;
     }
 
     /**
@@ -32,16 +44,16 @@ public class ConfigUtil {
      * @return the delay of the action bar message depending
      * with each increment representing a tick
      */
-    public int getDelay() {
-        return config.getInt(getDelayPath());
+    int getDelay() {
+        return getCONFIG().getInt(getDELAYPATH());
     }
 
-    private String getInvalidArgsPath() {
-        return this.INVALIDARGSPATH;
-    }
-
+    /**
+     * Retrieves the invalid arguments message from the config file
+     * @return the invalid arguments message in color as a String.
+     */
     public String getInvalidArgMsg() {
-        return getColoredConfigString(getInvalidArgsPath());
+        return getColoredConfigString(getINVALIDARGSPATH());
     }
 
     /**
@@ -50,23 +62,7 @@ public class ConfigUtil {
      * bar message is toggled
      */
     public String getToggleMessage() {
-        return getColoredConfigString(getTogglePath());
-    }
-
-    /**
-     * Gets the delay path from the config
-     * @return the path to the delay value in the config
-     */
-    private String getDelayPath() {
-        return this.DELAYPATH;
-    }
-
-    /**
-     * Retrieves the path to the toggle value in the config
-     * @return the path to the toggle value in the config
-     */
-    private String getTogglePath() {
-        return this.TOGGLEPATH;
+        return getColoredConfigString(getTOGGLEPATH());
     }
 
     /**
@@ -74,8 +70,8 @@ public class ConfigUtil {
      * @param path the path of the string
      * @return the string from the config according to the colors defined by it
      */
-    private String getColoredConfigString(String path) {
-        final String configString = config.getString(path);
+    private String getColoredConfigString(@NonNull String path) {
+        final String configString = getCONFIG().getString(path);
         return toColor(configString);
     }
 
@@ -84,18 +80,27 @@ public class ConfigUtil {
      * @param string the string to be converted to color
      * @return the string in color
      */
-    private String toColor(String string) {
+    private String toColor(@NonNull String string) {
         return ChatColor.translateAlternateColorCodes('&', string);
     }
 
     /**
      * TODO: Utilize this index for things like holiday/special news messages!
      * Retrieves the message list from the config file
+     * <p>This logic might look a little complex, but
+     * it is rather simple. Essentially, it retrieves a
+     * list of HashMaps from the config, each map being named
+     * whats unique about it. I build it this way for future
+     * special event implementation, such as a special action bar
+     * list for holiday-specific messages. All I'd have to do is
+     * have a nullable int with a default value of the index of
+     * a news map. The maps contain a key for adding/removing that
+     * can be set by the user.</p>
      * @return the message list
      */
-    public Map<String, String> getMessageMap() {
+    Map<String, String> getMessageMap() {
         Map<String, String> coloredMessages = new HashMap<>();
-        Map<?,?> newsEvents = config.getMapList(getMessageListPath()).get(0);
+        Map<?,?> newsEvents = getCONFIG().getMapList(getMESSAGELISTPATH()).get(0);
         newsEvents.forEach(
                 (k, m) -> ((Map<?,?>) m).forEach(
                 (key, msg) -> coloredMessages.put((String) key, toColor((String) msg))));
@@ -103,19 +108,16 @@ public class ConfigUtil {
     }
 
     /**
-     * Retrieves the path of the message list
-     * @return the path to the message list in the config
-     */
-    private String getMessageListPath() {
-        return this.MESSAGELISTPATH;
-    }
-
-    /**
-     * Adds a message to the news list
+     * Adds a message to the news list.
+     * <p>When a target key already exists,
+     * an underscore is appended to it to avoid
+     * overwriting. I didn't bother making that
+     * fancy or anything, but wanted it to be
+     * a thing.</p>
      * @param message the message to be added
      */
-    public void addToMessageList(String key, String message) {
-        Map<String, String> messageMap = getMessageMap();
+    public void addToMessageList(@NonNull String key, @NonNull String message) {
+        @NonNull final Map<String, String> messageMap = getMessageMap();
         while(messageMap.containsKey(key)) {
             key += "_";
         }
@@ -123,20 +125,45 @@ public class ConfigUtil {
         setMessageMap(messageMap);
     }
 
+    /**
+     * Removes a message from the message map
+     * @param key the key of the message to be removed
+     */
     public void removeFromMessageMap(String key) {
-        Map<String, String> newsMap = getMessageMap();
+        @NonNull Map<String, String> newsMap = getMessageMap();
         newsMap.remove(key);
         setMessageMap(newsMap);
     }
 
-    private void setMessageMap(Map<String,String> newsMap) {
-        List<Map> mapList = new ArrayList<>();
-        Map<String, Map<String,String>> newsSection = new HashMap<>();
-        newsSection.put("news", newsMap);
+    /**
+     * Converts a Map to the format used for storing news messages into
+     * the config
+     * <p>This would be done differently if other events were added.</p>
+     * @param newsMap the news messages map
+     * @return the map inside of a map inside of a list. Created in this manner
+     * for future features.
+     */
+    private List<Map> toConfigListMap(@NonNull Map<String, String> newsMap) {
+        List<Map> mapList = new ArrayList<>(); //Object to be put in config
+        Map<String, Map<String,String>> newsSection = new HashMap<>(); //Object to be put in list
+        newsSection.put("news", newsMap); //This is only hard coded for the purpose of this activity.
         mapList.add(newsSection);
-        config.set(getMessageListPath(), mapList);
-        plugin.getConfigManager().saveConfig();
-        plugin.getBroadcastUtil().restartNewsTask();
+        return mapList;
+    }
+
+    /**
+     * Sets a new message map to the config.
+     * <p>A message map represents a hashmap that
+     * contains a key and a message. The key is simply
+     * a way to identify a message and the message
+     * is what a player receives in their action bar.</p>
+     * @param newsMap the new message map
+     */
+    private void setMessageMap(@NonNull Map<String,String> newsMap) {
+        final List<Map> mapList = toConfigListMap(newsMap);
+        getCONFIG().set(getMESSAGELISTPATH(), mapList); //Adds it to config
+        getPLUGIN().getConfigManager().saveConfig(); //Saves config
+        getPLUGIN().getBroadcastUtil().restartNewsTask(); //Restarts scheduler task with updated messages.
     }
 
 

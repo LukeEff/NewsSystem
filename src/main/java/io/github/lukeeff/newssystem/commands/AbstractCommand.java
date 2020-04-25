@@ -1,40 +1,78 @@
 package io.github.lukeeff.newssystem.commands;
 
+import com.sun.istack.internal.NotNull;
+import io.github.lukeeff.newssystem.NewsSystem;
+import io.github.lukeeff.newssystem.utils.BroadcastUtil;
+import io.github.lukeeff.newssystem.utils.ConfigUtil;
+import io.github.lukeeff.newssystem.utils.DatabaseUtil;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * Abstract command is the highest level of command abstraction. It looks
+ * for the most common traits of all child classes, such as dependencies
+ * and checks, does it all here so code duplication is minimized, and
+ * becomes the parent of each command.
+ *
+ * @author lukeeff
+ * @since 4/25/2020
+ */
 abstract public class AbstractCommand implements CommandExecutor {
 
-    final int minLength = 1;
+    @Getter private static NewsSystem plugin;
+    @Getter @Setter private static ConfigUtil configUtil;
+    @Getter @Setter private static BroadcastUtil broadcastUtilInstance;
+    @Getter @Setter private static DatabaseUtil databaseUtil;
 
+    /**
+     * Assignment constructor for abstract news. Begins static
+     * assignment. News sub commands each define new instances
+     * of this class, so it makes sense to have static variables here
+     * for efficiency.
+     * @param instance instance of the main class
+     */
+    AbstractCommand(@NotNull NewsSystem instance) {
+        plugin = instance;
+        setBroadcastUtilInstance(getPlugin().getBroadcastUtil());
+        setConfigUtil(getPlugin().getConfigUtil());
+        setDatabaseUtil(getPlugin().getDatabaseUtil());
+    }
+
+    /**
+     * Default constructor for AbstractCommand.
+     */
+    AbstractCommand() {}
+
+    /**
+     * Overriden onCommand from CommandExecutor. Ensures a player sent a
+     * command and calls an abstract method for sub classes to override
+     * @param sender the sender of the command
+     * @param cmd the command that was executed
+     * @param str the name of the command
+     * @param args the arguments that follow the command
+     * @return true to not show the player what they typed.
+     */
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String str, String[] args) {
-        final Player player = getPlayer(sender);
-        if(player != null) {
-            final String playerID = player.getUniqueId().toString();
-            handleCommand(player, playerID, args);
+        if(isPlayer(sender)) {
+            Player player = (Player) sender;
+            handleCommand(player, args);
         }
         return true;
     }
 
-
-    abstract void handleCommand(Player player, String playerID, String[] args);
-
     /**
-     * Gets a player type from any type if
-     * possible
-     * @param sender the object being passed
-     * @return true when an instance of Player and null when not.
+     * Essentially another onCommand that is defined by a sub class that
+     * checks special requirements for each command
+     * @param player the player that sent the command
+     * @param args the arguments of the command
      */
-    public Player getPlayer(Object sender) {
-        if(isPlayer(sender)) {
-            return (Player) sender;
-        } else {
-            return null;
-        }
-    }
+    abstract void handleCommand(Player player, String[] args);
 
     /**
      * Checks if any object is an instance
@@ -42,11 +80,8 @@ abstract public class AbstractCommand implements CommandExecutor {
      * @param type the object being checked
      * @return true if it is a player instance
      */
-    private boolean isPlayer(Object type) {
-        if (type instanceof Player) {
-            return true;
-        }
-        return false;
+    private boolean isPlayer(@NonNull Object type) {
+        return type instanceof Player;
     }
 
 }

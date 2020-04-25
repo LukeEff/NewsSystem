@@ -2,8 +2,8 @@ package io.github.lukeeff.newssystem.managers;
 
 
 import io.github.lukeeff.newssystem.NewsSystem;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -11,11 +11,20 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * The config manager class will handle all tasks
+ * involving creating the config file, folder, and
+ * assigning a reference to the config so it can
+ * be manipulated.
+ *
+ * @author lukeeff
+ * @since 4/25/2020
+ */
 public class ConfigManager {
 
-    private NewsSystem plugin;
-    private FileConfiguration config;
-    private File configFile;
+    @Getter private final NewsSystem PLUGIN;
+    @Getter @Setter private FileConfiguration config;
+    @Getter @Setter private File configFile;
 
     /**
      * Constructor for ConfigManager.
@@ -25,25 +34,19 @@ public class ConfigManager {
      * @param instance the NewsSystem instance
      */
     public ConfigManager(NewsSystem instance) {
-        plugin = instance;
+        this.PLUGIN = instance;
         createRootDirectory();
-        setConfig(getConfigFile());
-    }
-
-    /**
-     * Get the instance of the config reference
-     * @return the configuration object
-     */
-    public FileConfiguration getConfig() {
-        return config;
+        createConfigFile();
+        loadConfig();
     }
 
     /**
      * Creates root plugin folder directory
      */
     private void createRootDirectory() {
-        if (!plugin.getDataFolder().exists()) {
-            plugin.getDataFolder().mkdirs();
+        final File folder = getPLUGIN().getDataFolder();
+        if (!folder.exists()) {
+            folder.mkdirs();
         }
     }
 
@@ -52,23 +55,22 @@ public class ConfigManager {
      * When a config file does not exist, a
      * brand new config file with the compiled
      * config values is written
-     * @param configFile the configuration file
-     *                   that will be set as a
-     *                   global variable for getting
-     *                   and setting values from
      */
-    private void setConfig(File configFile) {
-        config = new YamlConfiguration();
+    private void loadConfig() {
+        setConfig(new YamlConfiguration());
         try {
-            config.load(configFile);
+            getConfig().load(getConfigFile());
         } catch (InvalidConfigurationException | IOException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Saves the configuration file. Required to update news values inputted by a user.
+     */
     public void saveConfig() {
         try {
-            config.save(getConfigFile());
+            getConfig().save(createConfigFile());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -76,19 +78,17 @@ public class ConfigManager {
 
     /**
      * Gets the config file from the plugin folder
-     * <p>This method loks for an existing config
+     * <p>This method looks for an existing config
      * file inside of its root folder and return it.
      * When it is not found, it creates a new config.yml
      * file and returns the information inside of the
      * default config instead</p>
      * @return A reference to the config file in the dataFolder
      */
-    private File getConfigFile() {
-        final String NEWCONFIG = ChatColor.GREEN + "Config not found! Creating new config file.";
-        File configFile = new File(plugin.getDataFolder(), "config.yml");
-        if(!configFile.exists()) {
-            Bukkit.getConsoleSender().sendMessage(NEWCONFIG);
-            plugin.saveDefaultConfig();
+    private File createConfigFile() {
+        setConfigFile(new File(getPLUGIN().getDataFolder(), "config.yml"));
+        if(!getConfigFile().exists()) {
+            getPLUGIN().saveDefaultConfig();
         }
         return configFile;
     }

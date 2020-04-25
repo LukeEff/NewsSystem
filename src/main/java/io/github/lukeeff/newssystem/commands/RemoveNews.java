@@ -1,24 +1,43 @@
 package io.github.lukeeff.newssystem.commands;
 
+import lombok.Getter;
+import lombok.NonNull;
 import org.bukkit.entity.Player;
 
+import javax.annotation.Nullable;
+
+/**
+ * Remove news is an administrative command
+ * for removing news from the news map.
+ *
+ * @author lukeeff
+ * @since 4/25/2020
+ */
 public class RemoveNews extends AbstractNews implements InterfaceNews{
 
-    private static final int MINLENGTH = 2;
+    @Getter private static final int MINLENGTH = 2;
 
-    public RemoveNews() {
-        super(MINLENGTH);
-    }
-
-
+    /**
+     * Removes a news message from the news map based
+     * on a specified key.
+     * @param player the player sending the command.
+     * @param args the arguments of the command.
+     */
     @Override
-    public void modifyNewsMap(Player player, String[] args) {
-        final String newsMessageKey = args[getKeyIndex()];
+    public void modifyNewsMap(@Nullable Player player, @NonNull String[] args) {
+        final String newsMessageKey = args[getKEYINDEX()];
         getConfigUtil().removeFromMessageMap(newsMessageKey);
     }
 
+    /**
+     * Gets the minimum sub command length for
+     * the remove sub command.
+     * @return the minimum length required in the
+     * logic for the news sub command.
+     */
     @Override
-    public int getMinLength() {
-        return MINLENGTH;
+    public int getMINSUBCMDLENGTH() {
+        return getMINLENGTH();
     }
+
 }
