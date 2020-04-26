@@ -77,11 +77,29 @@ public class BroadcastUtil {
      * @param message the message to be broadcast to players in the recipient list.
      */
     private void sendActionBar(@NonNull final String message) {
-        for(final UUID playerID : getNewsRecipient()) {
+        for(UUID playerID : getNewsRecipient()) {
+            if(isOnline(playerID)) {
             @NonNull final CraftPlayer player = (CraftPlayer) Bukkit.getPlayer(playerID);
             final String actionMsg = "{\"text\":\"" + message + "\"}";
             final PacketPlayOutChat PACKET = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a(actionMsg), (byte) 2);
             player.getHandle().playerConnection.sendPacket(PACKET);
+        }  else {
+            getNewsRecipient().remove(playerID);
+        }}
+
+    }
+
+    /**
+     * Checks to see if a player is online.
+     *
+     * @param playerID the UUID of the player.
+     * @return false if the player is not online.
+     */
+    private boolean isOnline(@NonNull final UUID playerID) {
+        if(Bukkit.getPlayer(playerID) == null) {
+            return false;
+        } else {
+            return true;
         }
     }
 
