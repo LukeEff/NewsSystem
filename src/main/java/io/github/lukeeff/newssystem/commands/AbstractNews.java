@@ -24,8 +24,8 @@ import java.util.Map;
 abstract public class AbstractNews extends AbstractCommand implements CommandExecutor {
 
 
-     @Getter private static final int MINSUBLENGTH = 1;
-     @Getter private static final int KEYINDEX = 1;
+     @Getter private static final int MIN_SUB_LENGTH = 1;
+     @Getter private static final int KEY_INDEX = 1;
 
      @Getter @Setter private static Map<String, InterfaceNews> subCommands = new HashMap<>();
 
@@ -34,22 +34,23 @@ abstract public class AbstractNews extends AbstractCommand implements CommandExe
      * assignment. News sub commands each define new instances
      * of this class, so it makes sense to have static variables here
      * for efficiency.
-     * @param instance instance of the main class
+     * @param instance instance of the main class.
      */
     AbstractNews(@NotNull NewsSystem instance) {
         super(instance);
     }
 
     /**
-     * Default constructor for AbstractNews
+     * Default constructor for AbstractNews.
      */
     AbstractNews() { }
 
     /**
      * Called directly after superclass onCommand is called.
      * Checks for additional requirements that are exclusive to
-     * a target sub class
-     * @param player the player that sent the command
+     * a target sub class.
+     *
+     * @param player the player that sent the command.
      * @param args the arguments a player inputted.
      */
      @Override
@@ -64,12 +65,14 @@ abstract public class AbstractNews extends AbstractCommand implements CommandExe
 
     /**
      * Gets an InterfaceNews object from the subCommands HashMap
-     * in respect to the key specified
-     * <p>The InterfaceNews object is an interface that is inherited by
+     * in respect to the key specified.
+     *
+     * The InterfaceNews object is an interface that is inherited by
      * all sub commands. It allows us to group all of these commands
-     * together in a tidy fashion and call their methods.</p>
-     * @param key the key to the sub command
-     * @return the InterfaceNews object that is mapped to that key
+     * together in a tidy fashion and call their methods.
+     *
+     * @param key the key to the sub command.
+     * @return the InterfaceNews object that is mapped to that key.
      */
      private InterfaceNews getSubCommand(@NotNull String key) {
          return getSubCommands().get(key);
@@ -78,19 +81,21 @@ abstract public class AbstractNews extends AbstractCommand implements CommandExe
     /**
      * Checks to see if the arguments specified by a player
      * meet the requirements of a sub command.
-     * @param args the arguments of the player
-     * @return true if all requirements are met
+     *
+     * @param args the arguments of the player.
+     * @return true if all requirements are met.
      */
      private boolean isValidSubCommand(@NotNull String[] args) {
-         final String SUBCOMMANDKEY = args[0];
-         return isSubCommand(args[0]) && isSubCmdMinLength(args, getSubCommand(SUBCOMMANDKEY));
+         final String subCommandKey = args[0];
+         return isSubCommand(subCommandKey) && isSubCmdMinLength(args, getSubCommand(subCommandKey));
      }
 
     /**
      * Checks to see if the string a player inputted that represents the sub command
-     * key exists in the map of registered sub commands
-     * @param command the command key that will query the map
-     * @return true if the sub command was found
+     * key exists in the map of registered sub commands.
+     *
+     * @param command the command key that will query the map.
+     * @return true if the sub command was found.
      */
      private boolean isSubCommand(@NotNull String command) {
          return getSubCommands().containsKey(command);
@@ -99,29 +104,33 @@ abstract public class AbstractNews extends AbstractCommand implements CommandExe
     /**
      * Checks if the sub command entered is a valid length according to the sub class's
      * requirements for arguments.
-     * @param args the arguments of the command sender
-     * @param subCommand the sub command that will be called
-     * @return true if the arguments are a valid length for the sub command
+     *
+     * @param args the arguments of the command sender.
+     * @param subCommand the sub command that will be called.
+     * @return true if the arguments are a valid length for the sub command.
      */
      private boolean isSubCmdMinLength(String[] args, InterfaceNews subCommand) {
-         return args.length >= subCommand.getMINSUBCMDLENGTH();
+         return args.length >= subCommand.getMIN_SUB_CMD_LENGTH();
      }
 
     /**
-     * Checks if a command sent by user is long enough to have a sub command
-     * <p>This is done to avoid an out of bounds exception with the length
-     * of the arguments that could happen when checking for a valid sub command</p>
-     * @param args arguments specified by the player
-     * @return true if the player's arguments meet the required length check.
+     * Checks if a command sent by user is long enough to have a sub command.
+     *
+     * This is done to avoid an out of bounds exception with the length
+     * of the arguments that could happen when checking for a valid sub command.
+     *
+     * @param args arguments specified by the player.
+     * @return true if the player's arguments meet the required length check..
      */
      private boolean isMinLength(String[] args) {
-         return args.length >= getMINSUBLENGTH();
+         return args.length >= getMIN_SUB_LENGTH();
      }
 
     /**
-     * Registers new sub commands by adding them with a key command name to a map
-     * @param commandName the key that a player will input to call a sub command
-     * @param subCommand the sub command that is linked to the key
+     * Registers new sub commands by adding them with a key command name to a map.
+     *
+     * @param commandName the key that a player will input to call a sub command.
+     * @param subCommand the sub command that is linked to the key.
      */
     public void registerNewsSubCommands(@NotNull String commandName, @NotNull InterfaceNews subCommand) {
          getSubCommands().put(commandName, subCommand);

@@ -3,6 +3,7 @@ package io.github.lukeeff.newssystem.managers;
 
 import io.github.lukeeff.newssystem.NewsSystem;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -22,19 +23,21 @@ import java.io.IOException;
  */
 public class ConfigManager {
 
-    @Getter private final NewsSystem PLUGIN;
+    @Getter private final NewsSystem plugin;
     @Getter @Setter private FileConfiguration config;
     @Getter @Setter private File configFile;
 
     /**
      * Constructor for ConfigManager.
-     * <p>The constructor for the ConfigManager class will
+     *
+     * The constructor for the ConfigManager class will
      * initialize a FileConfiguration object that can be modified
-     * in the root NewsSystem folder</p>
+     * in the root NewsSystem folder
+     *
      * @param instance the NewsSystem instance
      */
-    public ConfigManager(NewsSystem instance) {
-        this.PLUGIN = instance;
+    public ConfigManager(@NonNull final NewsSystem instance) {
+        this.plugin = instance;
         createRootDirectory();
         createConfigFile();
         loadConfig();
@@ -44,7 +47,7 @@ public class ConfigManager {
      * Creates root plugin folder directory
      */
     private void createRootDirectory() {
-        final File folder = getPLUGIN().getDataFolder();
+        final File folder = getPlugin().getDataFolder();
         if (!folder.exists()) {
             folder.mkdirs();
         }
@@ -78,17 +81,19 @@ public class ConfigManager {
 
     /**
      * Gets the config file from the plugin folder
-     * <p>This method looks for an existing config
+     *
+     * This method looks for an existing config
      * file inside of its root folder and return it.
      * When it is not found, it creates a new config.yml
      * file and returns the information inside of the
-     * default config instead</p>
+     * default config instead
+     *
      * @return A reference to the config file in the dataFolder
      */
     private File createConfigFile() {
-        setConfigFile(new File(getPLUGIN().getDataFolder(), "config.yml"));
+        setConfigFile(new File(getPlugin().getDataFolder(), "config.yml"));
         if(!getConfigFile().exists()) {
-            getPLUGIN().saveDefaultConfig();
+            getPlugin().saveDefaultConfig();
         }
         return configFile;
     }

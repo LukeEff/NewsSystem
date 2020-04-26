@@ -30,30 +30,35 @@ public class SQLManager {
     @Getter @Setter private Connection connection;
 
     //Database file name
-    @Getter private final String DATABASENAME = "news";
+    @Getter private final String DATABASE_NAME = "news";
 
 
     /**
-     * Constructor for SQLManager. Assigns field variable
-     * values and establishes a connection to the database.
+     * Constructor for SQLManager.
+     *
+     * Assigns field variable values and establishes a
+     * connection to the database.
+     *
      * @param instance the instance of the NewsSystem class.
      */
-    public SQLManager(@NonNull NewsSystem instance) {
+    public SQLManager(@NonNull final NewsSystem instance) {
         setPlugin(instance);
         createDatabaseDirectory();
         establishDatabaseConnection();
     }
 
     /**
-     * Gets the path of the database file
-     * <p>This is similar to getting the
+     * Gets the path of the database file.
+     *
+     * This is similar to getting the
      * connection of a mySQL database with
      * the key difference being a file path
-     * instead of a URL</p>
-     * @return the path of the database file
+     * instead of a URL.
+     *
+     * @return the path of the database file.
      */
     private String getDatabaseFilePath() {
-        final String path = "\\" + getDATABASENAME() + ".db";
+        final String path = "\\" + getDATABASE_NAME() + ".db";
         return getDatabaseFolder().getPath().concat(path);
     }
 
@@ -61,24 +66,25 @@ public class SQLManager {
      * Create the database directory. Does not overwrite an existing directory.
      */
     private void createDatabaseDirectory() {
-        final String DATABASEDIRECTORYNAME = "database"; //Hard coded since no need to change the name of the folder
-        setDatabaseFolder(new File(getPlugin().getDataFolder(), DATABASEDIRECTORYNAME));
+        final String databaseDirectoryName = "database"; //Hard coded since no need to change the name of the folder
+        setDatabaseFolder(new File(getPlugin().getDataFolder(), databaseDirectoryName));
         getDatabaseFolder().mkdirs();
     }
 
     /**
      * Establishes a connection to the local SQLite database.
-     * <p>The method will only need to be called once and
+     *
+     * The method will only need to be called once and
      * will create a new database file if one does not exist.
      * SQLException will be thrown when driver is not found
      * or syntax is invalid. ClassNotFound thrown when driver
-     * class is not found. SQLite is a dependency in gradle.</p>
+     * class is not found. SQLite is a dependency in gradle.
      */
     private void establishDatabaseConnection() {
         try {
-            final String DRIVER = "jdbc:sqlite:";
+            final String driver = "jdbc:sqlite:";
             Class.forName("org.sqlite.JDBC"); //Required for initial connection.
-            this.connection = DriverManager.getConnection(DRIVER + getDatabaseFilePath());
+            this.connection = DriverManager.getConnection(driver + getDatabaseFilePath());
             createTable();
         } catch (SQLException | ClassNotFoundException syntaxException) {
             syntaxException.printStackTrace();
@@ -86,23 +92,25 @@ public class SQLManager {
     }
 
     /**
-     * Creates a new table in the database
-     * <p>For the purposes of this task, we
+     * Creates a new table in the database.
+     *
+     * For the purposes of this task, we
      * only will need one table. In real life
      * application, a library would be used to avoid
-     * code duplication or I'd build one myself</p>
-     * @throws SQLException thrown when syntax is invalid
+     * code duplication or I'd build one myself
+     *
+     * @throws SQLException thrown when syntax is invalid.
      */
     private void createTable() throws SQLException {
-        @NonNull final String TABLENAME = DatabaseUtil.getTABLENAME();
-        @NonNull final String PRIMARYCOl = DatabaseUtil.getCOLPRIMARY() + " varChar PRIMARY KEY, \n";
-        @NonNull final String SECONDCOL = DatabaseUtil.getCOLSECONDARY() + " varChar NOT NULL";
-        final String ENDCOL = "\n);";
-        String CREATETABLE = "CREATE TABLE IF NOT EXISTS " +
-                TABLENAME + "(\n" + PRIMARYCOl + SECONDCOL + ENDCOL;
+        @NonNull final String tableName = DatabaseUtil.getTABLE_NAME();
+        @NonNull final String primaryCol = DatabaseUtil.getCOL_PRIMARY() + " varChar PRIMARY KEY, \n";
+        @NonNull final String secondCol = DatabaseUtil.getCOL_SECONDARY() + " varChar NOT NULL";
+        final String endCol = "\n);";
+        final String createTable = "CREATE TABLE IF NOT EXISTS " +
+                tableName + "(\n" + primaryCol + secondCol + endCol;
 
-        Statement statement = connection.createStatement(); //Can't use PreparedStatement here.
-        statement.executeUpdate(CREATETABLE);
+        final Statement statement = connection.createStatement(); //Can't use PreparedStatement here.
+        statement.executeUpdate(createTable);
     }
 
 

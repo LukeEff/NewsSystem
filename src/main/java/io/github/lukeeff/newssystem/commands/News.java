@@ -15,11 +15,13 @@ public class News extends AbstractNews {
      * Default constructor for news.
      * Initializes field variables in super
      * class.
-     * <p>News is the module that gets
+     *
+     * News is the module that gets
      * constructed. Following that,
      * its instance is used to register
-     * new sub commands.</p>
-     * @param instance the main class instance
+     * new sub commands.
+     *
+     * @param instance the main class instance.
      */
     public News(NewsSystem instance) {
         super(instance);

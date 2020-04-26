@@ -12,13 +12,15 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * Main class for the project
- * <p>This project demonstrates the current aptitude of my
+ *
+ * This project demonstrates the current aptitude of my
  * programming skills at this current moment of time
- * for the trial developer application.</p>
- * <p>This project simply sends a player an action bar message
+ * for the trial developer application.
+ *
+ * This project simply sends a player an action bar message
  * packet at timed intervals in an organized order, saves their
  * preference in a database, messages, in a config file, and a
- * few other things.</p>
+ * few other things.
  *
  * @author lukeeff
  * @since 4/25/2020

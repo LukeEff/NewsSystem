@@ -23,36 +23,38 @@ import java.util.UUID;
  */
 public class PlayerJoin implements Listener {
 
-    @Getter private final NewsSystem PLUGIN;
-    @Getter private final DatabaseUtil DATABASEUTIL;
-    @Getter private final BroadcastUtil BROADCASTUTIL;
+    @Getter private final NewsSystem plugin;
+    @Getter private final DatabaseUtil databaseUtil;
+    @Getter private final BroadcastUtil broadcastUtil;
 
     /**
      * Constructor for PlayerJoin class. Assigns
      * the main instance.
-     * @param instance instance of the mian class
+     *
+     * @param instance instance of the main class
      */
     public PlayerJoin(NewsSystem instance) {
-        this.PLUGIN = instance;
-        this.DATABASEUTIL = getPLUGIN().getDatabaseUtil();
-        this.BROADCASTUTIL = getPLUGIN().getBroadcastUtil();
+        this.plugin = instance;
+        this.databaseUtil = getPlugin().getDatabaseUtil();
+        this.broadcastUtil = getPlugin().getBroadcastUtil();
     }
 
     /**
      * Listens for when a player joins and
      * adds them to the database if they are new
      * and registers them for the news messages if
-     * it is enabled for them
-     * @param event the event being listened for
+     * it is enabled for them.
+     *
+     * @param event the event being listened for.
      */
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
-        final UUID PLAYERID = player.getUniqueId();
+        final UUID playerID = player.getUniqueId();
 
-        if(!getDATABASEUTIL().playerExists(PLAYERID)) {
-            getDATABASEUTIL().addPlayerToDatabase(PLAYERID);
+        if(!getDatabaseUtil().playerExists(playerID)) {
+            getDatabaseUtil().addPlayerToDatabase(playerID);
         }
-        getBROADCASTUTIL().registerPlayer(PLAYERID);
+        getBroadcastUtil().registerPlayer(playerID);
     }
 }

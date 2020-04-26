@@ -34,6 +34,7 @@ abstract public class AbstractCommand implements CommandExecutor {
      * assignment. News sub commands each define new instances
      * of this class, so it makes sense to have static variables here
      * for efficiency.
+     *
      * @param instance instance of the main class
      */
     AbstractCommand(@NotNull NewsSystem instance) {
@@ -49,12 +50,13 @@ abstract public class AbstractCommand implements CommandExecutor {
     AbstractCommand() {}
 
     /**
-     * Overriden onCommand from CommandExecutor. Ensures a player sent a
-     * command and calls an abstract method for sub classes to override
-     * @param sender the sender of the command
-     * @param cmd the command that was executed
-     * @param str the name of the command
-     * @param args the arguments that follow the command
+     * Overridden onCommand from CommandExecutor. Ensures a player sent a
+     * command and calls an abstract method for sub classes to override.
+     *
+     * @param sender the sender of the command.
+     * @param cmd the command that was executed.
+     * @param str the name of the command.
+     * @param args the arguments that follow the command.
      * @return true to not show the player what they typed.
      */
     @Override
@@ -68,19 +70,21 @@ abstract public class AbstractCommand implements CommandExecutor {
 
     /**
      * Essentially another onCommand that is defined by a sub class that
-     * checks special requirements for each command
-     * @param player the player that sent the command
-     * @param args the arguments of the command
+     * checks special requirements for each command.
+     *
+     * @param player the player that sent the command.
+     * @param args the arguments of the command.
      */
-    abstract void handleCommand(Player player, String[] args);
+    abstract void handleCommand(@NonNull Player player, @NonNull String[] args);
 
     /**
      * Checks if any object is an instance
-     * of a player and returns false if not
-     * @param type the object being checked
-     * @return true if it is a player instance
+     * of a player and returns false if not.
+     *
+     * @param type the object being checked.
+     * @return true if it is a player instance.
      */
-    private boolean isPlayer(@NonNull Object type) {
+    private boolean isPlayer(@NonNull CommandSender type) {
         return type instanceof Player;
     }
 

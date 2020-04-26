@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
  */
 public class RemoveNews extends AbstractNews implements InterfaceNews{
 
-    @Getter private static final int MINLENGTH = 2;
+    @Getter private static final int MIN_LENGTH = 2;
 
     /**
      * Removes a news message from the news map based
@@ -25,7 +25,7 @@ public class RemoveNews extends AbstractNews implements InterfaceNews{
      */
     @Override
     public void modifyNewsMap(@Nullable Player player, @NonNull String[] args) {
-        final String newsMessageKey = args[getKEYINDEX()];
+        final String newsMessageKey = args[getKEY_INDEX()];
         getConfigUtil().removeFromMessageMap(newsMessageKey);
     }
 
@@ -36,8 +36,8 @@ public class RemoveNews extends AbstractNews implements InterfaceNews{
      * logic for the news sub command.
      */
     @Override
-    public int getMINSUBCMDLENGTH() {
-        return getMINLENGTH();
+    public int getMIN_SUB_CMD_LENGTH() {
+        return getMIN_LENGTH();
     }
 
 }

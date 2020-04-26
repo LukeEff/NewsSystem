@@ -16,17 +16,19 @@ public interface InterfaceNews {
 
     /**
      * Modifies the news map relative to the
-     * inherited classes' override
-     * @param player the player sending the command
-     * @param args the arguments of the command
+     * inherited classes' override.
+     *
+     * @param player the player sending the command.
+     * @param args the arguments of the command.
      */
     void modifyNewsMap(@NonNull Player player, @NonNull String[] args);
 
     /**
      * Gets the minimum sub command length for
-     * the target sub command
+     * the target sub command.
+     *
      * @return the minimum length required in the
      * logic for this sub command.
      */
-    int getMINSUBCMDLENGTH();
+    int getMIN_SUB_CMD_LENGTH();
 }
